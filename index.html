@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan de Ahorro Estudiantil</title>
+    <style>
+        /* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f4f4f4;
+}
+
+header {
+    width: 100%;
+    background-color: #5a9ff9;
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+.header-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.header-buttons button {
+    background-color: white;
+    color: #0a77bb;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.header-buttons button:hover {
+    background-color: #457fa0;
+    color: white;
+}
+
+main {
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+section {
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+input, button {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    cursor: pointer;
+    background-color: #2d6fe2;
+    color: white;
+}
+
+button:hover {
+    background-color: #1097ea;
+}
+
+#preset-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+#preset-buttons button {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+#transaction-history {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+#transaction-history li {
+    background-color: #f9f9f9;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+#charts-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 400px;
+    border-radius: 10px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover, .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    header h1 {
+        font-size: 24px;
+    }
+
+    .header-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .header-buttons button {
+        width: 90%;
+        margin: 5px 0;
+    }
+
+    main {
+        padding: 10px;
+    }
+
+    section {
+        padding: 10px;
+    }
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Plan de Ahorro "Fe y Finanzas"</h1>
+        <div class="header-buttons">
+            <button id="profile">Perfil</button>
+            <button id="settings">Configuración</button>
+            <button id="reset-progress">Reiniciar</button>
+            <button id="share-progress">Compartir Progreso</button>
+        </div>
+    </header>
+    <main>
+        <section id="balance-section">
+            <h2>Saldo Actual: <span id="current-balance">0.00</span></h2>
+        </section>
+        <section id="transaction-section">
+            <h2>Transacciones</h2>
+            <form id="transaction-form">
+                <input type="text" id="description" placeholder="Descripción" required>
+                <input type="number" id="amount" placeholder="Monto" required>
+                <button type="button" id="add-income">Agregar Ingreso</button>
+                <button type="button" id="add-expense">Agregar Gasto</button>
+            </form>
+            <div id="preset-buttons">
+                <button class="preset-button" data-description="Comida">Comida</button>
+                <button class="preset-button" data-description="Transporte">Transporte</button>
+                <button class="preset-button" data-description="Material Escolar">Utiles Escolares</button>
+                <button class="preset-button" data-description="Material Escolar">Recarga de Saldo</button>
+            </div>
+            <ul id="transaction-history"></ul>
+            <div id="pagination-controls">
+                <button id="prev-page">Anterior</button>
+                <span id="page-info"></span>
+                <button id="next-page">Siguiente</button>
+            </div>
+        </section>
+        <section id="charts-section">
+            <h2>Resumen Financiero</h2>
+            <canvas id="incomeChart"></canvas>
+            <canvas id="expenseChart"></canvas>
+        </section>        
+    </main>
+
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form id="settings-form">
+                <label for="student-name">Nombre del Estudiante:</label>
+                <input type="text" id="student-name" required>
+                <label for="currency">Moneda:</label>
+                <select id="currency">
+                    <option value="VED">Bolivares Digitales (Bs.D)</option>
+                    <option value="USD">Dólares Americanos ($)</option>
+                </select>
+                <button type="submit">Guardar</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="congrats-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p id="congrats-message"></p>
+            <div id="congrats-emoji"></div>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Perfil del Estudiante</h2>
+            <p id="student-name-display"></p>
+            <p>Moneda: <span id="currency-display"></span></p>
+            <p>Gasto del Mes: <span id="monthly-expense">0.00</span></p>
+            <p>Ingreso del Mes: <span id="monthly-income">0.00</span></p>
+            <h3>Insignias Ganadas</h3>
+            <ul id="badges-list"></ul>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const balanceElement = document.getElementById('current-balance');
+    const transactionHistory = document.getElementById('transaction-history');
+    const addIncomeButton = document.getElementById('add-income');
+    const addExpenseButton = document.getElementById('add-expense');
+    const presetButtons = document.querySelectorAll('.preset-button');
+    const settingsButton = document.getElementById('settings');
+    const resetButton = document.getElementById('reset-progress');
+    const shareButton = document.getElementById('share-progress');
+    const prevPageButton = document.getElementById('prev-page');
+    const nextPageButton = document.getElementById('next-page');
+    const pageInfo = document.getElementById('page-info');
+    const settingsModal = document.getElementById('settings-modal');
+    const congratsModal = document.getElementById('congrats-modal');
+    const profileButton = document.getElementById('profile');
+    const profileModal = document.getElementById('profile-modal');
+    const closeModalButtons = document.querySelectorAll('.close');
+    const settingsForm = document.getElementById('settings-form');
+    const congratsMessage = document.getElementById('congrats-message');
+    const congratsEmoji = document.getElementById('congrats-emoji');
+    const studentNameDisplay = document.getElementById('student-name-display');
+    const currencyDisplay = document.getElementById('currency-display');
+    const monthlyExpenseDisplay = document.getElementById('monthly-expense');
+    const monthlyIncomeDisplay = document.getElementById('monthly-income');
+    const badgesList = document.getElementById('badges-list');
+    let balance = parseFloat(localStorage.getItem('balance')) || 0;
+    let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+    let currentPage = 1;
+    const itemsPerPage = 5;
+
+    const updateBalance = () => {
+        const currency = localStorage.getItem('currency') || 'VED';
+        const currencySymbol = currency === 'USD' ? '$' : 'Bs.D';
+        balanceElement.textContent = `${currencySymbol}${balance.toFixed(2)}`;
+    };
+
+    const renderTransactions = () => {
+        transactionHistory.innerHTML = '';
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const paginatedTransactions = transactions.slice(start, end);
+
+        paginatedTransactions.forEach(transaction => {
+            const li = document.createElement('li');
+            li.textContent = `${transaction.description}: ${transaction.amount.toFixed(2)}`;
+            transactionHistory.appendChild(li);
+        });
+
+        pageInfo.textContent = `Página ${currentPage} de ${Math.ceil(transactions.length / itemsPerPage)}`;
+    };
+
+    const updateLocalStorage = () => {
+        localStorage.setItem('transactions', JSON.stringify(transactions));
+        localStorage.setItem('balance', balance);
+    };
+
+    const addTransaction = (description, amount) => {
+        transactions.push({ description, amount });
+        balance += amount;
+        updateLocalStorage();
+        updateBalance();
+        renderTransactions();
+        updateCharts();
+        checkMilestones();
+    };
+
+    addIncomeButton.addEventListener('click', () => {
+        const description = document.getElementById('description').value;
+        const amount = parseFloat(document.getElementById('amount').value);
+        if (description && !isNaN(amount)) {
+            addTransaction(description, amount);
+            document.getElementById('transaction-form').reset();
+        }
+    });
+
+    addExpenseButton.addEventListener('click', () => {
+        const description = document.getElementById('description').value;
+        const amount = parseFloat(document.getElementById('amount').value);
+        if (description && !isNaN(amount)) {
+            addTransaction(description, -amount);
+            document.getElementById('transaction-form').reset();
+        }
+    });
+
+    presetButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const description = button.getAttribute('data-description');
+            document.getElementById('description').value = description;
+        });
+    });
+
+    prevPageButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTransactions();
+        }
+    });
+
+    nextPageButton.addEventListener('click', () => {
+        if (currentPage < Math.ceil(transactions.length / itemsPerPage)) {
+            currentPage++;
+            renderTransactions();
+        }
+    });
+
+    settingsButton.addEventListener('click', () => {
+        settingsModal.style.display = 'block';
+    });
+
+    profileButton.addEventListener('click', () => {
+        const studentName = localStorage.getItem('studentName') || 'Estudiante';
+        const currency = localStorage.getItem('currency') || 'VED';
+        const currencySymbol = currency === 'USD' ? '$' : 'Bs.D';
+
+        studentNameDisplay.textContent = `Nombre: ${studentName}`;
+        currencyDisplay.textContent = currencySymbol;
+
+        const monthlyIncome = transactions.filter(t => t.amount > 0).reduce((acc, t) => acc + t.amount, 0);
+        const monthlyExpense = transactions.filter(t => t.amount < 0).reduce((acc, t) => acc + Math.abs(t.amount), 0);
+
+        monthlyIncomeDisplay.textContent = `${currencySymbol}${monthlyIncome.toFixed(2)}`;
+        monthlyExpenseDisplay.textContent = `${currencySymbol}${monthlyExpense.toFixed(2)}`;
+
+        // Renderizar insignias (premios)
+        badgesList.innerHTML = '';
+        if (balance >= 100) {
+            const badge = document.createElement('li');
+            badge.textContent = `Premio por ahorrar más de 100 ${currencySymbol}`;
+            badgesList.appendChild(badge);
+        }
+        if (balance < -50) {
+            const badge = document.createElement('li');
+            badge.textContent = `Advertencia: Has gastado más de 50 ${currencySymbol}`;
+            badgesList.appendChild(badge);
+        }
+
+        profileModal.style.display = 'block';
+    });
+
+    closeModalButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            settingsModal.style.display = 'none';
+            congratsModal.style.display = 'none';
+            profileModal.style.display = 'none';
+        });
+    });
+
+    resetButton.addEventListener('click', () => {
+        if (confirm('¿Estás seguro de que deseas reiniciar el progreso?')) {
+            transactions = [];
+            balance = 0;
+            updateLocalStorage();
+            updateBalance();
+            renderTransactions();
+            updateCharts();
+        }
+    });
+
+    settingsForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const studentName = document.getElementById('student-name').value;
+        const currency = document.getElementById('currency').value;
+        localStorage.setItem('studentName', studentName);
+        localStorage.setItem('currency', currency);
+        settingsModal.style.display = 'none';
+        updateBalance();
+        renderTransactions();
+    });
+
+    shareButton.addEventListener('click', () => {
+        html2canvas(document.body).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'progreso.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    });
+
+    const checkMilestones = () => {
+        const currency = localStorage.getItem('currency') === 'USD' ? '$' : 'Bs.D';
+        const studentName = localStorage.getItem('studentName') || 'Estudiante';
+
+        if (balance >= 100) {
+            congratsMessage.textContent = `¡Felicidades, ${studentName}! Has reunido más de 100 ${currency}`;
+            congratsEmoji.innerHTML = '🎉🎊';
+            congratsModal.style.display = 'block';
+        } else if (balance < -50) {
+            congratsMessage.textContent = `¡Cuidado, ${studentName}! Has gastado más de 50 ${currency} este mes`;
+            congratsEmoji.innerHTML = '😞💸';
+            congratsModal.style.display = 'block';
+        }
+    };
+
+    const updateCharts = () => {
+    // Definir variables locales para las instancias de las gráficas
+    let incomeChart, expenseChart;
+
+    // Destruir instancias existentes de las gráficas
+    if (incomeChart) {
+        incomeChart.destroy();
+    }
+    if (expenseChart) {
+        expenseChart.destroy();
+    }
+
+    // Datos para las gráficas
+    const incomeData = transactions.filter(t => t.amount > 0).map(t => t.amount);
+    const expenseData = transactions.filter(t => t.amount < 0).map(t => Math.abs(t.amount));
+    const incomeLabels = transactions.filter(t => t.amount > 0).map(t => t.description);
+    const expenseLabels = transactions.filter(t => t.amount < 0).map(t => t.description);
+
+    // Contexto de las gráficas
+    const incomeChartCtx = document.getElementById('incomeChart').getContext('2d');
+    const expenseChartCtx = document.getElementById('expenseChart').getContext('2d');
+
+    // Crear gráfica de ingresos
+    incomeChart = new Chart(incomeChartCtx, {
+        type: 'bar',
+        data: {
+            labels: incomeLabels,
+            datasets: [{
+                label: 'Ingresos',
+                data: incomeData,
+                backgroundColor: 'rgba(40, 167, 69, 0.5)',
+                borderColor: 'rgba(40, 167, 69, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+
+    // Crear gráfica de gastos
+    expenseChart = new Chart(expenseChartCtx, {
+        type: 'bar',
+        data: {
+            labels: expenseLabels,
+            datasets: [{
+                label: 'Gastos',
+                data: expenseData,
+                backgroundColor: 'rgba(220, 53, 69, 0.5)',
+                borderColor: 'rgba(220, 53, 69, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+};
+
+
+    // Inicializar con los datos almacenados en cache
+    updateBalance();
+    renderTransactions();
+    updateCharts();
+    checkMilestones();
+});
+
+
+    </script>
+</body>
+</html>
